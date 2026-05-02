@@ -1,6 +1,6 @@
 # WP Secure File Transfer Pro
 
-**Version:** 1.0.2  
+**Version:** 1.1.0  
 **Requires WordPress:** 5.3+  
 **Requires PHP:** 7.4+  
 **License:** GPL-3.0-or-later
@@ -224,19 +224,23 @@ Enable **Delete all plugin data on uninstall** in Settings before removing the p
 
 ## Changelog
 
+### 1.1.0
+- **Sortable tables** — clickable column sorting on all tabular data. Server-side URL-based sorting on paginated lists (vault list, audit log, My Vaults); client-side sorting on inspector and vault detail sub-tables and the Users tab. Active sort direction indicated with ↑/↓. Edit sub-rows stay pinned to their parent row during sort.
+- **WordPress dashboard widgets** — admin vault overview widget (total/active vaults, file count, encrypted size, active shares, 7-day downloads, 30-day OTP failures) and personal My Vaults widget (vault/file/share counts, last 5 activity events) on the wp-admin home screen.
+- **Contextual enforce checkboxes** — the standalone "Apply Limits to Existing Shares" card in Settings is replaced by per-section amber banners that appear only when the user modifies values in the Download Limits or Link Expiration section. Reverting changes hides the banner and unchecks the checkbox automatically.
+- **Settings help tabs** — added dedicated contextual help sections for File Uploads, SIEM Logging, Audit Log Retention, Encryption Key, and Data & Privacy/Storage. Revised existing help sections to reflect current capabilities.
+- **Help tab updates** — all admin panel and user dashboard contextual help tabs updated to reflect SFT Admin roles, sortable columns, dashboard widgets, and inline editing capabilities.
+- **Security: SIEM path validation** — the SIEM log file path is now validated to be absolute and free of `..` traversal sequences before being stored. Invalid paths are rejected with a warning notice and the previous value is retained.
+- **Security: Clipboard API** — the encryption key copy button uses `navigator.clipboard.writeText()` with a graceful fallback to `execCommand('copy')` for older browsers.
+- **Documentation** — new `docs/` directory with six reference guides: Installation, Configuration, User Guide, Admin Guide, Security Reference, and Architecture.
+
 ### 1.0.2
-- **SFT Admin user type** — new `sft_admin` capability grants non-WordPress-administrator users full access to the Secure Transfer admin panel. Promote, demote, and revoke from the redesigned Users tab.
-- **Users tab redesign** — two sections (SFT Admins / Vault Users) with three-action contextual buttons per access tier.
-- **Sortable tables** — clickable column sorting on all tabular data. Server-side sorting (with URL state) on paginated lists; client-side sorting on inspector and detail sub-tables. Edit sub-rows stay pinned to their parent during sort.
-- **WordPress dashboard widgets** — admin vault overview widget and personal My Vaults widget on the wp-admin home screen.
+- **SFT Admin user type** — new `sft_admin` capability grants non-WordPress-administrator users full access to the Secure Transfer admin panel. WordPress administrators continue to have full access implicitly. Promote, demote, and revoke from the redesigned Users tab.
+- **Users tab redesign** — replaced WP role column with two sections: SFT Admins and Vault Users. Search panel shows current SFT status with contextual action buttons.
 - **Timezone display** — all dates and times throughout the plugin (audit log, vault inspector, user dashboard, CSV export) now display in the site's configured timezone (Settings → General) rather than UTC.
 - **SIEM logging** — write every audit event to an OS log file in JSON (NDJSON) or CSV format for ingestion by Splunk, Datadog, ELK, and other SIEM tools.
 - **Admin vault expiry editing** — admins can edit a vault's expiry date inline from the vault inspector.
 - **Admin share editing** — admins can edit a share's download limit and expiry date inline from the vault inspector.
-- **Contextual enforce checkboxes** — the separate "Apply Limits to Existing Shares" card is replaced by per-section checkboxes that only appear when the user has actually modified a setting in that section.
-- **Settings help tabs** — added dedicated help sections for File Uploads, SIEM Logging, Audit Log Retention, Encryption Key, and Data & Privacy.
-- **Security: SIEM path validation** — the log file path is now validated to be absolute and free of `..` traversal sequences before being stored.
-- **Security: Clipboard API** — key copy button uses `navigator.clipboard.writeText()` with fallback for older browsers.
 
 ### 1.0.1
 - **Streaming encryption/decryption** — AES-256-CBC encrypt and decrypt now process files in 1 MB chunks, eliminating PHP memory exhaustion on large files (e.g. 2+ GB).

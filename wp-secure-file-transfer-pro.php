@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Secure File Transfer Pro
  * Description: Encrypted file vaults with two-factor external sharing, comprehensive audit logging, lifecycle management, and super-admin vault oversight.
- * Version:     1.0.2
+ * Version:     1.1.0
  * Requires PHP: 7.4
  * License:     GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ─── Plugin constants ─────────────────────────────────────────────────────────
-define( 'SFT_VERSION',   '1.0.1' );
+define( 'SFT_VERSION',   '1.1.0' );
 define( 'SFT_DIR',       plugin_dir_path( __FILE__ ) );
 define( 'SFT_BASENAME',  plugin_basename( __FILE__ ) );
 define( 'SFT_VAULT_DIR', WP_CONTENT_DIR . '/uploads/sft-vaults/' );

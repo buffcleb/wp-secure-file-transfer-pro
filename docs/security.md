@@ -132,13 +132,13 @@ The two-factor flow relies on email deliverability. If an attacker controls the 
 
 ---
 
-## Security Review Summary (v1.0.2)
+## Security Review Summary (v1.1.0)
 
 | Finding | Severity | Status |
 |---|---|---|
-| SIEM log path not validated as absolute | Medium | Fixed in 1.0.2 |
-| Key copy used deprecated `execCommand` | Low | Fixed in 1.0.2 |
-| Users tab help text described old single-tier access | Informational | Fixed in 1.0.2 |
+| SIEM log path not validated as absolute | Medium | Fixed in 1.1.0 |
+| Key copy used deprecated `execCommand` | Low | Fixed in 1.1.0 |
+| Users tab help text described old single-tier access | Informational | Fixed in 1.1.0 |
 | Chunk assembly TOCTOU | Low | Documented, mitigated by directory permissions |
 | Hardcoded download session TTL | Low | Documented, acceptable default |
 | SQL ORDER BY whitelist pattern | Informational | Design correct; documented |
