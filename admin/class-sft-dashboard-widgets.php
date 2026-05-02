@@ -166,6 +166,7 @@ function sft_render_user_vaults_widget(): void {
 		SFT_EVT_FILE_DELETED    => 'File deleted',
 		SFT_EVT_FILE_DOWNLOADED => 'File downloaded',
 		SFT_EVT_SHARE_CREATED   => 'Share created',
+		SFT_EVT_SHARE_RESENT    => 'Invite resent',
 		SFT_EVT_SHARE_REVOKED   => 'Share revoked',
 		SFT_EVT_SHARE_EXPIRED   => 'Share expired',
 		SFT_EVT_OTP_REQUESTED   => 'OTP sent',

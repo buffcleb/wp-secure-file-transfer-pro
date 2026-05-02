@@ -1,6 +1,6 @@
 # WP Secure File Transfer Pro
 
-**Version:** 1.1.0  
+**Version:** 1.1.1  
 **Requires WordPress:** 5.3+  
 **Requires PHP:** 7.4+  
 **License:** GPL-3.0-or-later
@@ -223,6 +223,9 @@ Enable **Delete all plugin data on uninstall** in Settings before removing the p
 ---
 
 ## Changelog
+
+### 1.1.1
+- **Resend share invite** — a **Resend** button on every pending or active share re-sends the original invite email to the recipient using the same share token and link. Available in both the admin vault inspector and the user vault detail page. The action is recorded in the audit log as `share_resent`.
 
 ### 1.1.0
 - **Sortable tables** — clickable column sorting on all tabular data. Server-side URL-based sorting on paginated lists (vault list, audit log, My Vaults); client-side sorting on inspector and vault detail sub-tables and the Users tab. Active sort direction indicated with ↑/↓. Edit sub-rows stay pinned to their parent row during sort.

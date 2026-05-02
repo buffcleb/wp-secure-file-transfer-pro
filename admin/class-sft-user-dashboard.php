@@ -395,6 +395,23 @@ function sft_handle_user_dashboard_post(): void {
 		exit;
 	}
 
+	// ── Resend share invite ───────────────────────────────────────────────────
+	if ( isset( $_POST['sft_ud_resend_share'] ) ) {
+		$share_id = (int) ( $_POST['share_id'] ?? 0 );
+		$share    = sft_get_share( $share_id );
+		if ( $share ) {
+			$assert_vault_owner( (int) $share->vault_id );
+			$result = sft_resend_share_invite( $share_id, $user_id );
+			if ( is_wp_error( $result ) ) {
+				sft_ud_set_notice( 'Could not resend invite: ' . esc_html( $result->get_error_message() ), 'error' );
+			} else {
+				sft_ud_set_notice( 'Invite email resent to ' . esc_html( $share->recipient_email ) . '.', 'success' );
+			}
+		}
+		wp_redirect( $detail_url( $vault_id ) );
+		exit;
+	}
+
 	// ── Edit share (download limit + expiry) ──────────────────────────────────
 	if ( isset( $_POST['sft_ud_edit_share'] ) ) {
 		$share_id = (int) ( $_POST['share_id'] ?? 0 );

@@ -32,6 +32,7 @@ define( 'SFT_EVT_FILE_DELETED',        'file_deleted' );
 define( 'SFT_EVT_FILE_DOWNLOADED',     'file_downloaded' );
 define( 'SFT_EVT_FILE_SERVED_ADMIN',   'file_served_admin' );
 define( 'SFT_EVT_SHARE_CREATED',       'share_created' );
+define( 'SFT_EVT_SHARE_RESENT',        'share_resent' );
 define( 'SFT_EVT_SHARE_REVOKED',       'share_revoked' );
 define( 'SFT_EVT_SHARE_EXPIRED',       'share_expired' );
 define( 'SFT_EVT_OTP_REQUESTED',       'otp_requested' );
@@ -309,6 +310,7 @@ function sft_audit_event_label( string $event_type ): string {
 		SFT_EVT_FILE_DOWNLOADED    => 'File Downloaded',
 		SFT_EVT_FILE_SERVED_ADMIN  => 'File Served (Admin)',
 		SFT_EVT_SHARE_CREATED      => 'Share Created',
+		SFT_EVT_SHARE_RESENT       => 'Share Invite Resent',
 		SFT_EVT_SHARE_REVOKED      => 'Share Revoked',
 		SFT_EVT_SHARE_EXPIRED      => 'Share Expired',
 		SFT_EVT_OTP_REQUESTED      => 'OTP Requested',

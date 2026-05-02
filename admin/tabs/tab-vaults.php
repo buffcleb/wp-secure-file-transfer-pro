@@ -287,6 +287,13 @@ function sft_render_vault_inspector( int $vault_id ): void {
 							<td style="white-space:nowrap;">
 								<?php if ( $editable ) : ?>
 									<button type="button" class="sft-btn" onclick="sftAdmToggle('<?php echo esc_js( $edit_id ); ?>')" style="margin-right:4px;">Edit</button>
+									<form method="post" style="display:inline;margin-right:4px;">
+										<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
+										<input type="hidden" name="share_id" value="<?php echo (int) $s->id; ?>">
+										<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
+										<input type="submit" name="sft_admin_resend_share" value="Resend" class="sft-btn"
+										       title="Resend the invite email to <?php echo esc_attr( $s->recipient_email ); ?>">
+									</form>
 									<form method="post" style="display:inline;"
 									      onsubmit="return confirm('Revoke this share? The recipient loses access immediately.');">
 										<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>

@@ -288,6 +288,43 @@ function sft_send_share_invite( int $share_id, object $vault, string $recipient_
 	);
 }
 
+/**
+ * Resends the invite email for an existing pending or active share.
+ *
+ * The share token is unchanged — the recipient receives the same link again.
+ *
+ * @param int $share_id  Share to resend.
+ * @param int $actor_id  WP user ID performing the resend (for audit log).
+ * @return true|WP_Error
+ */
+function sft_resend_share_invite( int $share_id, int $actor_id ) {
+	$share = sft_get_share( $share_id );
+	if ( ! $share ) {
+		return new WP_Error( 'not_found', 'Share not found.' );
+	}
+
+	if ( ! in_array( $share->status, [ 'pending', 'active' ], true ) ) {
+		return new WP_Error( 'share_inactive', 'Invite can only be resent for pending or active shares.' );
+	}
+
+	$vault = sft_get_vault( (int) $share->vault_id );
+	if ( ! $vault ) {
+		return new WP_Error( 'vault_not_found', 'Vault not found.' );
+	}
+
+	sft_send_share_invite( $share_id, $vault, $share->recipient_email, $actor_id );
+
+	sft_log(
+		SFT_EVT_SHARE_RESENT,
+		(int) $share->vault_id,
+		$share_id,
+		[ 'recipient' => $share->recipient_email ],
+		$actor_id
+	);
+
+	return true;
+}
+
 // ─── OTP flow ─────────────────────────────────────────────────────────────────
 
 /**

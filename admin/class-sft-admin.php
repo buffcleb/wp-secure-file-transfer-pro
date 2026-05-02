@@ -158,6 +158,22 @@ function sft_handle_admin_post(): void {
 		exit;
 	}
 
+	// ── Admin: resend share invite ────────────────────────────────────────────
+	if ( isset( $_POST['sft_admin_resend_share'] ) ) {
+		$share_id = (int) ( $_POST['share_id'] ?? 0 );
+		$vault_id = (int) ( $_POST['vault_id'] ?? 0 );
+		if ( $share_id ) {
+			$result = sft_resend_share_invite( $share_id, get_current_user_id() );
+			if ( is_wp_error( $result ) ) {
+				sft_set_notice( 'Could not resend invite: ' . esc_html( $result->get_error_message() ), 'error' );
+			} else {
+				sft_set_notice( 'Invite email resent.', 'success' );
+			}
+		}
+		wp_redirect( add_query_arg( [ 'page' => 'sft-pro', 'tab' => 'vaults', 'vault_id' => $vault_id ], admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	// ── Admin: change vault status ───────────────────────────────────────────
 	if ( isset( $_POST['sft_admin_vault_status'] ) ) {
 		$vault_id   = (int) ( $_POST['vault_id'] ?? 0 );

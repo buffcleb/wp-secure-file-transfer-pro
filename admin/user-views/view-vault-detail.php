@@ -256,7 +256,14 @@ function sft_render_user_vault_detail( int $vault_id ): void {
 						<td style="color:#888; font-size:12px;"><?php echo $s->last_accessed ? esc_html( sft_format_date( $s->last_accessed ) ) : 'Never'; ?></td>
 						<td style="white-space:nowrap;">
 							<?php if ( $editable ) : ?>
-								<button type="button" class="sft-btn" onclick="sftUdToggle('<?php echo esc_js( $edit_id ); ?>')">Edit</button>
+								<button type="button" class="sft-btn" onclick="sftUdToggle('<?php echo esc_js( $edit_id ); ?>')" style="margin-right:4px;">Edit</button>
+								<form method="post" action="<?php echo esc_url( $form_url ); ?>" style="display:inline;margin-right:4px;">
+									<?php wp_nonce_field( 'sft_user_dashboard_action', 'sft_user_nonce' ); ?>
+									<input type="hidden" name="vault_id"  value="<?php echo $vault_id; ?>">
+									<input type="hidden" name="share_id"  value="<?php echo (int) $s->id; ?>">
+									<input type="submit" name="sft_ud_resend_share" value="Resend"
+									       class="sft-btn" title="Resend invite to <?php echo esc_attr( $s->recipient_email ); ?>">
+								</form>
 								<form method="post" action="<?php echo esc_url( $form_url ); ?>" style="display:inline;"
 								      onsubmit="return confirm('Revoke access for <?php echo esc_js( $s->recipient_email ); ?>?');">
 									<?php wp_nonce_field( 'sft_user_dashboard_action', 'sft_user_nonce' ); ?>
