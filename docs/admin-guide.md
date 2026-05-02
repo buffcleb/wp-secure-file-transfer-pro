@@ -2,7 +2,7 @@
 
 This guide covers the Secure Transfer admin panel, accessible at **Secure Transfer** in the wp-admin sidebar. Access requires `manage_options` (WordPress administrator) or the `sft_admin` capability.
 
-[[SCREENSHOT: wp-admin sidebar showing the "Secure Transfer" menu item with sub-items Dashboard, My Vaults (user), and the full admin panel open]]
+![Admin Dashboard - Full With Menu](images/AdminDashboard_FullWithMenu.jpg)
 
 ---
 
@@ -10,7 +10,7 @@ This guide covers the Secure Transfer admin panel, accessible at **Secure Transf
 
 The Dashboard gives a real-time overview of the entire plugin.
 
-[[SCREENSHOT: Admin Dashboard tab showing stat cards, 7-day sparkline chart, Recent Activity table, and Security Status card]]
+![Admin Dashboard - Full](images/AdminDashboard_Full_.jpg)
 
 ### Stats cards
 
@@ -45,7 +45,7 @@ Shows the current state of key security controls:
 
 Lists every vault on the site across all users.
 
-[[SCREENSHOT: Vaults tab showing the filter panel on the left and a table of vaults with sortable column headers, status badges, and Inspect buttons]]
+![Admin Dashboard - Vaults](images/AdminDashboard_Vaults.jpg)
 
 ### Filtering and sorting
 
@@ -59,7 +59,7 @@ Click any sortable column header (Name, Status, Created, Expires) to sort. Click
 
 Click a vault name or **Inspect** to open the vault inspector.
 
-[[SCREENSHOT: Vault Inspector open for "Project Alpha Deliverables" showing the three sections: Encrypted Files, Shares, and Vault Audit Log]]
+![Admin Dashboard - Vaults Inspect](images/AdminDashboard_VaultsInspector.jpg)
 
 The inspector shows:
 - **Encrypted Files** — download (decrypted) or delete any file. All admin downloads are logged.
@@ -77,7 +77,8 @@ All tables in the inspector are sortable client-side by clicking column headers.
 
 The full, filterable, paginated event log for all plugin activity.
 
-[[SCREENSHOT: Audit Log tab with filter panel showing Event Type, Vault ID, date range and keyword filters, and a table of audit rows with sortable columns]]
+![Admin Dashboard - Audit Log](images/AdminDashboard_AuditLog.jpg)
+
 
 ### Filtering
 
@@ -106,7 +107,7 @@ Auto-prune via WP-Cron can be configured in **Settings → Audit Log Retention**
 
 Manage which non-administrator users have access to vault features.
 
-[[SCREENSHOT: Users tab showing SFT Admins section, Vault Users section, and the search panel with a user found showing "Grant SFT Admin Access" and "Grant Vault Access" buttons]]
+![User Dashboard - Vault Detail](images/UserDashboard_VaultDetail.jpg)
 
 ### Access roles
 
@@ -162,6 +163,7 @@ An **admin vault overview** widget appears on the WordPress dashboard for all SF
 - A link to the full admin panel
 
 [[SCREENSHOT: WordPress dashboard showing the "Secure File Transfer — Vault Overview" admin widget with stat tiles]]
+![WordPress Dashboard - Admin Widget](images/WordpressDashboard_AdminWidget.jpg)
 
 ---
 
