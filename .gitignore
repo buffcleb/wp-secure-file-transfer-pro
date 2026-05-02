@@ -1,0 +1,39 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# PHP / Composer
+vendor/
+composer.lock
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build artefacts
+*.zip
+*.tar.gz
+dist/
+
+# Logs & temp
+*.log
+*.tmp
+
+# Environment / secrets — never commit these
+.env
+.env.*
+wp-config.php
+
+# WordPress upload data — lives outside the plugin directory
+uploads/
+
+# PHPUnit
+.phpunit.result.cache
+coverage/
