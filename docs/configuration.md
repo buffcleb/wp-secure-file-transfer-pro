@@ -26,8 +26,9 @@ When the constant is defined, the key is never stored in the database and the Se
 4. Copy the 64-character key immediately — the plugin never stores it.
 5. Paste it as the `SFT_MASTER_KEY` constant in `wp-config.php`.
 
-[[SCREENSHOT: Key generator modal with the generated key visible and Copy button highlighted]]
-![Admin Dashboard - Key generator modal](/images/AdminDashboard_Settings_EncryptionKeys.jpg)
+<p align="center">
+<img src="/images/AdminDashboard_Settings_EncryptionKeys.jpg" width="300" alt="Admin Dashboard - Key generator modal"/>
+</p>
 
 > **Warning:** Replacing an existing master key permanently breaks decryption of all previously uploaded files. Only generate a new key on a fresh installation with no uploaded files. If you need to rotate keys, you must decrypt and re-encrypt every file — there is no automated migration tool.
 
@@ -79,7 +80,6 @@ Expiry is applied at end-of-day (23:59:59 site time) on the selected date.
 
 Like download limits, a contextual checkbox appears when values change, offering to retroactively apply the new limits to existing shares.
 
-[[SCREENSHOT: Settings page showing Link Expiration section with the amber "Apply to existing shares" checkbox visible after a value was changed]]
 ![Admin Dashboard - Link Expiration](/images/AdminDashboard_Settings_LinkExpiration.jpg)
 
 ---
@@ -95,7 +95,7 @@ Controls automated email alerts sent to vault owners.
 
 Download notification emails include the file name, share recipient email, and the recipient's IP address. Each share can receive at most one expiry warning regardless of how many cron cycles run before it expires.
 
-[[SCREENSHOT: Notifications section of Settings showing both toggles enabled and lead time set to 3 days]]
+![Admin Dashboard - Notifications](/images/AdminDashboard_Settings_Notifications.jpg)
 
 ---
 
@@ -107,7 +107,7 @@ Download notification emails include the file name, share recipient email, and t
 
 Leave blank to accept any file type. When populated, uploads whose extension is not in the list are rejected at the server-side chunk-finalize step — after assembly, before encryption. The assembled temp file is deleted on rejection. Administrators are exempt from this restriction.
 
-[[SCREENSHOT: File Type Restrictions section showing the extensions field populated with "pdf, docx, xlsx, png, jpg"]]
+![Admin Dashboard - File Type Restrictions](/images/AdminDashboard_Settings_FileTypeRestrictions.jpg)
 
 ---
 
@@ -119,7 +119,7 @@ Leave blank to accept any file type. When populated, uploads whose extension is 
 
 Quota is calculated as the sum of all encrypted file sizes stored across every vault owned by the user. The check runs at upload time — if the new file would push the user over quota the upload is rejected and the assembled temp file is discarded. Set to `0` to impose no quota. Administrators are exempt.
 
-[[SCREENSHOT: Storage Quotas section with the quota field set to 500 MB]]
+![Admin Dashboard - Storage Quotas](/images/AdminDashboard_Settings_StorageQuotas.jpg)
 
 ---
 
@@ -136,7 +136,7 @@ Customize the subject line and body of every automated email sent by the plugin.
 
 Templates support `{placeholder}` tokens replaced at send time. Available tokens are listed beneath each body field in the Settings UI. Leaving a subject or body blank restores the built-in default for that field.
 
-[[SCREENSHOT: Email Templates section with the Share Invitation template expanded showing subject and body fields with placeholder tokens visible]]
+![Admin Dashboard - Email Templates](/images/AdminDashboard_Settings_EmailTemplates.jpg)
 
 ---
 
@@ -170,7 +170,6 @@ Both formats include: `timestamp_utc`, `event`, `vault_id`, `share_id`, `actor_i
 
 If the path fails validation, the previous value is retained and a warning is shown. The invalid path is never saved.
 
-[[SCREENSHOT: SIEM Logging section of Settings with Log File Path and Format fields filled in]]
 ![Admin Dashboard - Full](/images/AdminDashboard_Settings_SIEMLogging.jpg)
 
 ---
