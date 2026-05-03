@@ -61,7 +61,7 @@ After creating the vault you are taken directly to its detail page.
 
 Click **Edit Name & Description** at the top of the vault detail page to rename the vault or update its description. Changes take effect immediately and are recorded in the activity log. Files and shares are not affected.
 
-[[SCREENSHOT: Vault detail page with the Edit Name & Description form open, showing the vault name field and description textarea]]
+![User Dashboard - Edit Vault](/images/UserDashboard_VaultDetailEdit.jpg)
 
 ### Editing vault expiry
 
@@ -79,8 +79,6 @@ In the **Files** section, click **Encrypt & Upload** to open the upload form.
 - Large files are uploaded in chunks, so you can upload files larger than the server's PHP `upload_max_filesize` limit.
 - The maximum file size and permitted file types are configured by your administrator.
 - If a file fails (type restriction, quota exceeded, server error), its row shows an error and the remaining files continue uploading.
-
-[[SCREENSHOT: Vault detail upload form with three files queued — one complete, one in progress with a progress bar, one pending]]
 
 ![User Dashboard - Vault File Upload](/images/UserDashboard_VaultFileUpload.jpg)
 
@@ -116,11 +114,13 @@ The two-factor share flow:
 
 A 30-minute download session is issued after successful verification.
 
-![Recipient - Email Confirmation](/images/Recipient_EmailConfirmation.jpg)
-![Recipient - One Time Code](/images/Recipient_OneTimeCode.jpg)
-![Recipient - Download access](/images/Recipient_DownloadPage.jpg)
-
-[[SCREENSHOT: Recipient download page showing file list with individual download buttons and a "Download All as ZIP" button highlighted at the top]]
+<p align="center">
+<img src="/images/Recipient_EmailConfirmation.jpg" width="300" alt="Recipient - Email Confirmation"/>
+<br>
+<img src="/images/Recipient_OneTimeCode.jpg" width="300" alt="Recipient - One Time Code""/>
+<br>
+<img src="/images/Recipient_DownloadPage.jpg" width="300" alt="Recipient - Download access""/>
+</p>
 
 ### Editing a share
 
