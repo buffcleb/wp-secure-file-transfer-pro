@@ -1,6 +1,6 @@
 # Configuration Guide
 
-All plugin settings live under **Secure Transfer → Settings**. Settings are organized into six sections.
+All plugin settings live under **Secure Transfer → Settings**. Settings are organized into eleven sections.
 
 ---
 
@@ -45,8 +45,9 @@ Controls the one-time code (OTP) sent to share recipients.
 |---|---|---|---|
 | OTP Validity | Minutes a code remains valid after being emailed | 15 | 5–60 |
 | Max Verification Attempts | Incorrect code entries before invalidation | 5 | 1–20 |
+| OTP Cooldown | Minimum seconds between code requests | 60 | 0 = off |
 
-Shorter OTP validity reduces the exposure window if email is delayed or intercepted. Lower attempt limits reduce brute-force risk.
+Shorter OTP validity reduces the exposure window if email is delayed or intercepted. Lower attempt limits reduce brute-force risk. The cooldown prevents automated code-request flooding — the recipient sees a countdown message if they request a code too quickly.
 
 ---
 
@@ -80,6 +81,62 @@ Like download limits, a contextual checkbox appears when values change, offering
 
 [[SCREENSHOT: Settings page showing Link Expiration section with the amber "Apply to existing shares" checkbox visible after a value was changed]]
 ![Admin Dashboard - Link Expiration](/images/AdminDashboard_Settings_LinkExpiration.jpg)
+
+---
+
+## Notifications
+
+Controls automated email alerts sent to vault owners.
+
+| Setting | Description | Default |
+|---|---|---|
+| Enable Download Notifications | Email the vault owner each time a recipient downloads a file | Off |
+| Expiry Warning Lead Time | Days before a share expires to send the owner a warning email (0 = disabled) | 0 |
+
+Download notification emails include the file name, share recipient email, and the recipient's IP address. Each share can receive at most one expiry warning regardless of how many cron cycles run before it expires.
+
+[[SCREENSHOT: Notifications section of Settings showing both toggles enabled and lead time set to 3 days]]
+
+---
+
+## File Type Restrictions
+
+| Setting | Description | Default |
+|---|---|---|
+| Allowed File Extensions | Comma-separated list of permitted extensions (e.g. `pdf, docx, png`) | *(blank — all allowed)* |
+
+Leave blank to accept any file type. When populated, uploads whose extension is not in the list are rejected at the server-side chunk-finalize step — after assembly, before encryption. The assembled temp file is deleted on rejection. Administrators are exempt from this restriction.
+
+[[SCREENSHOT: File Type Restrictions section showing the extensions field populated with "pdf, docx, xlsx, png, jpg"]]
+
+---
+
+## Storage Quotas
+
+| Setting | Description | Default |
+|---|---|---|
+| Per-User Storage Quota (MB) | Maximum total encrypted storage per vault user across all their vaults | 0 *(no limit)* |
+
+Quota is calculated as the sum of all encrypted file sizes stored across every vault owned by the user. The check runs at upload time — if the new file would push the user over quota the upload is rejected and the assembled temp file is discarded. Set to `0` to impose no quota. Administrators are exempt.
+
+[[SCREENSHOT: Storage Quotas section with the quota field set to 500 MB]]
+
+---
+
+## Email Templates
+
+Customize the subject line and body of every automated email sent by the plugin.
+
+| Template | When sent |
+|---|---|
+| **Share Invitation** | Vault owner creates a share link |
+| **OTP Verification** | Recipient requests a one-time code |
+| **Download Notification** | Recipient successfully downloads a file (requires notifications enabled) |
+| **Share Expiry Warning** | A share is within the configured warning lead time of expiring (requires lead time > 0) |
+
+Templates support `{placeholder}` tokens replaced at send time. Available tokens are listed beneath each body field in the Settings UI. Leaving a subject or body blank restores the built-in default for that field.
+
+[[SCREENSHOT: Email Templates section with the Share Invitation template expanded showing subject and body fields with placeholder tokens visible]]
 
 ---
 

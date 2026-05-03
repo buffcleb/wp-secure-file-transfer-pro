@@ -23,14 +23,22 @@ WP Secure File Transfer Pro lets authenticated WordPress users upload files into
 |---|---|
 | **Encrypted vault storage** | AES-256-CBC with a unique per-vault key derived from a site-wide master key. Files stored outside the webroot. |
 | **Two-factor external sharing** | Recipients receive an invite link, confirm their email, then verify a time-limited one-time code before downloading. |
+| **Multi-file upload** | Upload multiple files in one go. Files queue and upload sequentially through the chunked system with per-file progress rows. |
+| **ZIP bulk download** | Recipients can download all vault files as a single ZIP archive. Requires PHP `ZipArchive`; button hidden automatically when unavailable. |
 | **Chunked file upload** | Files split client-side and reassembled server-side — bypasses PHP `upload_max_filesize` and `post_max_size` limits. |
+| **File type restrictions** | Comma-separated extension allowlist blocks disallowed uploads server-side at the chunk-finalize step. |
+| **Per-user storage quotas** | Set a per-user MB ceiling enforced at upload time. Administrators are exempt. |
 | **Role-based access** | Two tiers of non-admin access: **SFT Admin** (full panel) and **Vault User** (My Vaults only). |
 | **Sortable tables** | All tabular data supports clickable column sorting — server-side for paginated lists, client-side for inspector sub-tables. |
 | **WordPress dashboard widgets** | Admin vault overview widget and personal My Vaults widget on the wp-admin home screen. |
 | **Global share limits** | Configure default and maximum download counts and link expiration windows. Retroactively enforce on existing shares. |
-| **Lifecycle management** | Hourly WP-Cron expires vaults and shares, prunes stale OTPs, cleans orphaned chunks, and optionally auto-prunes audit entries. |
+| **OTP rate limiting** | Configurable cooldown between OTP requests prevents automated code-request flooding. |
+| **Lifecycle management** | Hourly WP-Cron expires vaults and shares, sends expiry warnings, prunes stale OTPs, cleans orphaned chunks, and optionally auto-prunes audit entries. |
+| **Download notifications** | Vault owners receive an email each time a recipient downloads a file (configurable). |
+| **Share expiry warnings** | Vault owners are emailed a configurable number of days before each share link expires. Each share is warned once. |
+| **Email templates** | Customize subject and body for all four system emails (Share Invite, OTP, Download Notification, Expiry Warning) with `{placeholder}` tokens. |
 | **Immutable audit log** | Every vault, file, share, OTP, and settings event logged with actor, IP, and timestamp. Filterable, sortable, exportable to CSV. |
-| **Super-admin vault inspector** | Browse every vault, download any file (logged), revoke shares, edit vault expiry and share limits, change vault status, delete vaults. |
+| **Super-admin vault inspector** | Browse every vault; download (including ZIP), edit name/description, transfer ownership, change status, revoke shares, delete vaults. |
 | **SIEM logging** | Append every audit event to an OS log file in JSON (NDJSON) or CSV format for Splunk, Datadog, ELK, and similar tools. |
 | **Encryption key generator** | Server-side CSPRNG key generation with a copy-to-clipboard modal for placing the key in `wp-config.php`. |
 | **Contextual help** | WordPress contextual help tabs on every admin panel tab and the user dashboard. |
@@ -44,6 +52,7 @@ WP Secure File Transfer Pro lets authenticated WordPress users upload files into
 | WordPress | 5.3 |
 | PHP | 7.4 |
 | PHP extensions | `openssl`, `mbstring` |
+| PHP extensions (optional) | `zip` — required for ZIP bulk download |
 | MySQL / MariaDB | 5.6 / 10.0 |
 
 ---
@@ -128,10 +137,10 @@ Accessible at **Secure Transfer** (requires `manage_options` or `sft_admin` capa
 | Tab | Description |
 |---|---|
 | Dashboard | Real-time stats, 7-day download sparkline, recent activity, security status |
-| Vaults | Browse all vaults; filter by status/name; inspect files, shares, and audit trail per vault; edit expiry and shares inline; sortable columns |
+| Vaults | Browse all vaults; filter by status/name; inspect files, shares, and audit trail per vault; edit name/description, expiry, and shares inline; transfer ownership; ZIP download; sortable columns |
 | Audit Log | Filterable, sortable, paginated event log; CSV export; manual prune; all timestamps in site timezone |
 | Users | Manage SFT Admins and Vault Users; grant, promote, demote, revoke; user search |
-| Settings | All plugin configuration; encryption key management; SIEM log output |
+| Settings | All plugin configuration; OTP cooldown; notifications; file type restrictions; storage quotas; email templates; encryption key; SIEM logging |
 
 ![Admin Dashboard - Vaults](images/AdminDashboard_Vaults.jpg)
 
@@ -142,7 +151,8 @@ Accessible at **Secure Transfer** (requires `manage_options` or `sft_admin` capa
 Users with vault access manage their own vaults under **My Vaults** in wp-admin.
 
 - **Create a vault** — name, optional description, optional expiry date.
-- **Upload files** — chunked upload with progress bar; files encrypted before storage.
+- **Edit vault name/description** — rename or update description inline at any time.
+- **Upload files** — multi-file chunked upload with per-file progress rows; files encrypted before storage.
 - **Share a vault** — enter recipient email, optional download limit, optional expiry; recipient completes two-factor verification.
 - **Edit a share** — update download limit or expiry date on an existing share without revoking it.
 - **Revoke a share** — removes access immediately.
@@ -206,10 +216,14 @@ All settings at **Secure Transfer → Settings**. See [Configuration](docs/confi
 
 | Section | Key Settings |
 |---|---|
-| Two-Factor Verification | OTP validity (5–60 min, default 15), max attempts (1–20, default 5) |
+| Two-Factor Verification | OTP validity (5–60 min, default 15), max attempts (1–20, default 5), OTP cooldown (seconds) |
 | Download Limits | Allow unlimited, default limit, maximum limit |
 | Link Expiration | Allow no expiry, default days, maximum days |
 | File Uploads | Maximum file size in MB (can exceed server's `upload_max_filesize`) |
+| Notifications | Download notification emails, share expiry warning lead time (days) |
+| File Type Restrictions | Comma-separated extension allowlist (blank = allow all) |
+| Storage Quotas | Per-user storage ceiling in MB (0 = no limit) |
+| Email Templates | Customize subject and body for Share Invite, OTP, Download Notification, Expiry Warning |
 | SIEM Logging | Enable, absolute log path, format (JSON / CSV) |
 | Audit Log Retention | Auto-prune on/off, retention window in days |
 | Data & Privacy | Delete all data on uninstall |

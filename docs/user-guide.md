@@ -57,6 +57,12 @@ After creating the vault you are taken directly to its detail page.
 
 ![User Dashboard - Create New Vault](/images/UserDashboard_VaultDetail.jpg)
 
+### Editing vault name and description
+
+Click **Edit Name & Description** at the top of the vault detail page to rename the vault or update its description. Changes take effect immediately and are recorded in the activity log. Files and shares are not affected.
+
+[[SCREENSHOT: Vault detail page with the Edit Name & Description form open, showing the vault name field and description textarea]]
+
 ### Editing vault expiry
 
 Click **Edit Expiry** at the top of the vault detail page to change or clear the expiry date.
@@ -65,12 +71,16 @@ Click **Edit Expiry** at the top of the vault detail page to change or clear the
 
 ## Uploading Files
 
-In the **Files** section, click **Encrypt & Upload** (or drag a file onto the upload area).
+In the **Files** section, click **Encrypt & Upload** to open the upload form.
 
+- Select one or more files at once — the file picker accepts multiple selections.
+- Files upload sequentially. Each file gets its own progress row showing its name and upload state.
 - Files are encrypted on the server before being written to disk. The original unencrypted version is never stored.
 - Large files are uploaded in chunks, so you can upload files larger than the server's PHP `upload_max_filesize` limit.
-- A progress bar shows chunk-by-chunk upload progress for large files.
-- The maximum file size is configured by your administrator (shown as reference info on the upload form).
+- The maximum file size and permitted file types are configured by your administrator.
+- If a file fails (type restriction, quota exceeded, server error), its row shows an error and the remaining files continue uploading.
+
+[[SCREENSHOT: Vault detail upload form with three files queued — one complete, one in progress with a progress bar, one pending]]
 
 ![User Dashboard - Vault File Upload](/images/UserDashboard_VaultFileUpload.jpg)
 
@@ -101,12 +111,16 @@ The two-factor share flow:
 
 1. **Invite email** — recipient receives an email with a unique link. The link encodes a secret token; it is single-use for the OTP step.
 2. **Email confirmation** — recipient opens the link and enters their email address to verify they are the intended recipient.
-3. **One-time code** — a 6-digit code is emailed to the recipient. They have a limited time to enter it (configured by your admin, default 15 minutes).
-4. **Download access** — after successful verification, the recipient sees all files in the vault and can download them. A 30-minute download session is issued.
+3. **One-time code** — a 6-digit code is emailed to the recipient. They have a limited time to enter it (configured by your admin, default 15 minutes). A cooldown may be configured — if so, the recipient must wait before requesting another code.
+4. **Download access** — after successful verification, the recipient sees all files in the vault and can download them individually. If the vault has more than one file and the server supports it, a **Download All as ZIP** button also appears.
+
+A 30-minute download session is issued after successful verification.
 
 ![Recipient - Email Confirmation](/images/Recipient_EmailConfirmation.jpg)
 ![Recipient - One Time Code](/images/Recipient_OneTimeCode.jpg)
 ![Recipient - Download access](/images/Recipient_DownloadPage.jpg)
+
+[[SCREENSHOT: Recipient download page showing file list with individual download buttons and a "Download All as ZIP" button highlighted at the top]]
 
 ### Editing a share
 
@@ -115,6 +129,10 @@ While a share is pending or active, click **Edit** next to it to change the down
 ### Revoking a share
 
 Click **Revoke** to immediately block the recipient's access. Any active download session they hold is invalidated. The share record is retained in the activity log for audit purposes.
+
+### Expiry warning emails
+
+If your administrator has enabled expiry warnings, you will receive an email a configurable number of days before each share link is due to expire. Each share triggers at most one warning. If you receive a warning and want to extend the share, edit its expiry date before it lapses.
 
 ---
 

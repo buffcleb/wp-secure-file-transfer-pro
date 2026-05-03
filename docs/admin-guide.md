@@ -62,12 +62,16 @@ Click a vault name or **Inspect** to open the vault inspector.
 ![Admin Dashboard - Vaults Inspect](/images/AdminDashboard_VaultsInspector.jpg)
 
 The inspector shows:
-- **Encrypted Files** — download (decrypted) or delete any file. All admin downloads are logged.
-- **Shares** — current status, recipient, download count, last access. Edit download limit/expiry or revoke any share.
+- **Encrypted Files** — download (decrypted) or delete any file. All admin downloads are logged. A **Download All as ZIP** button appears when the vault has more than one file and the PHP `ZipArchive` extension is available.
+- **Shares** — current status, recipient, download count, last access. Edit download limit/expiry, resend the invite, or revoke any share.
 - **Vault Audit Log** — last 25 events for this vault.
-- **Vault Status** — change to active, expired, revoked, or archived.
+- **Edit Name & Description** — rename the vault or update its description inline without affecting files or shares.
+- **Transfer Ownership** — reassign the vault to any user who already has Vault User or SFT Admin access. The previous owner immediately loses access; the new owner sees the vault in their list.
+- **Vault Status** — change to active, expired, revoked, or archived. Non-active vaults block new uploads and share creation.
 - **Vault Expiry** — edit or clear the vault's expiry date.
 - **Delete Vault** — permanently remove the vault, all files, and all shares. Cannot be undone.
+
+[[SCREENSHOT: Vault inspector showing the Edit Name & Description form open with the vault name and description fields filled in]]
 
 All tables in the inspector are sortable client-side by clicking column headers.
 
@@ -168,7 +172,21 @@ An **admin vault overview** widget appears on the WordPress dashboard for all SF
 
 ## Settings Tab
 
-See the [Configuration Guide](configuration.md) for full documentation of every setting.
+See the [Configuration Guide](configuration.md) for full documentation of every setting. The Settings tab includes eleven sections in v1.2.0:
+
+| Section | Summary |
+|---|---|
+| Encryption Key | Generate or configure the master key |
+| Two-Factor Verification | OTP validity, attempt limit, cooldown |
+| Download Limits | Per-share download caps and defaults |
+| Link Expiration | Per-share expiry windows and defaults |
+| Notifications | Download alerts and expiry warnings to vault owners |
+| File Type Restrictions | Extension allowlist for uploads |
+| Storage Quotas | Per-user encrypted storage ceiling |
+| Email Templates | Customize all four system email subjects and bodies |
+| SIEM Logging | File-based event log for SIEM tools |
+| Audit Log Retention | Auto-prune schedule and retention window |
+| Data & Privacy | Wipe all data on uninstall |
 
 ---
 

@@ -79,6 +79,8 @@ Every form submission and AJAX action is protected by a WordPress nonce:
 
 - MIME type validation via `wp_check_filetype_and_ext()` before accepting a chunk
 - Extension checked against site-configured allowed MIME types
+- Administrator-configurable extension allowlist (`sft_allowed_file_extensions`) enforced at chunk-finalize time — after all chunks are assembled and before encryption. Rejected files are unlinked immediately; no partial encrypted output is written.
+- Per-user storage quota checked at the same finalize step; uploads that would exceed the quota are rejected and the assembled temp file is discarded
 - Files are stored under random names with `.enc` extension, not the original filename
 - Original filename is stored only in the database, never used for file system operations
 
@@ -95,6 +97,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 ```
+
+### OTP Rate Limiting
+
+A configurable cooldown (`sft_otp_cooldown_seconds`, default 60) is enforced before a new OTP is issued for a share. The most recent unused OTP's `created_at` is compared to the current time; if within the cooldown window, a `WP_Error` is returned and no new code is generated or stored. The check runs before the "expire previous OTPs" step so a legitimate recipient is not accidentally locked out by a rapid second request.
 
 ### Open Redirects
 
@@ -132,13 +138,16 @@ The two-factor flow relies on email deliverability. If an attacker controls the 
 
 ---
 
-## Security Review Summary (v1.1.0)
+## Security Review Summary (v1.2.0)
 
 | Finding | Severity | Status |
 |---|---|---|
 | SIEM log path not validated as absolute | Medium | Fixed in 1.1.0 |
 | Key copy used deprecated `execCommand` | Low | Fixed in 1.1.0 |
 | Users tab help text described old single-tier access | Informational | Fixed in 1.1.0 |
+| No cooldown between OTP requests — recipients could flood codes | Low | Fixed in 1.2.0 (configurable cooldown) |
+| File type not enforced server-side at finalize step | Low | Fixed in 1.2.0 (extension allowlist) |
+| No server-side storage cap per user | Low | Fixed in 1.2.0 (per-user quota) |
 | Chunk assembly TOCTOU | Low | Documented, mitigated by directory permissions |
 | Hardcoded download session TTL | Low | Documented, acceptable default |
 | SQL ORDER BY whitelist pattern | Informational | Design correct; documented |

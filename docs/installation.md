@@ -7,6 +7,7 @@
 | WordPress | 5.3 |
 | PHP | 7.4 |
 | PHP extensions | `openssl`, `mbstring` |
+| PHP extensions (optional) | `zip` — required for ZIP bulk download on recipient pages |
 | MySQL / MariaDB | 5.6 / 10.0 |
 
 Verify extensions are active before installing:
@@ -49,7 +50,7 @@ After activation, complete these steps before accepting uploads:
 
 Upgrades are non-destructive. The plugin does not run `DROP TABLE` statements on update — only `CREATE TABLE IF NOT EXISTS`, so existing data is always preserved.
 
-If a database schema change is required between versions, the activation hook handles it via `dbDelta()`.
+From v1.2.0 onwards the plugin tracks its own database version via the `sft_db_version` option (matching the `SFT_DB_VERSION` constant). On `plugins_loaded`, `sft_maybe_upgrade_db()` compares the stored version to the current constant and runs `dbDelta()` if they differ, adding any new columns or indexes without touching existing data. This means upgrading from an older version is handled automatically on the next page load after the plugin files are replaced — no manual activation step required for schema changes.
 
 ---
 

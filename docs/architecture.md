@@ -17,13 +17,14 @@ wp-secure-file-transfer-pro/
 │   ├── security.md
 │   └── architecture.md                 # This file
 ├── includes/
-│   ├── class-sft-db.php                # Schema creation, activation, path helpers
+│   ├── class-sft-db.php                # Schema creation, activation, path helpers, DB migration
 │   ├── class-sft-crypto.php            # Encryption, OTP generation, token functions
 │   ├── class-sft-audit.php             # Audit logging, SIEM write, query functions
-│   ├── class-sft-vault.php             # Vault and file CRUD, chunked upload helpers
+│   ├── class-sft-vault.php             # Vault and file CRUD, chunked upload helpers, transfer, quota
 │   ├── class-sft-share.php             # Share management and two-factor flow
 │   ├── class-sft-lifecycle.php         # WP-Cron lifecycle tasks
-│   └── class-sft-frontend.php          # Public share page, shortcode, AJAX handlers
+│   ├── class-sft-notifications.php     # Email template engine, download notifications, expiry warnings
+│   └── class-sft-frontend.php          # Public share page, shortcode, AJAX handlers, ZIP download
 └── admin/
     ├── class-sft-admin.php             # Admin menu, POST handler, asset enqueue, help tabs
     ├── class-sft-user-dashboard.php    # My Vaults menu, POST handler, user help tabs
@@ -79,17 +80,18 @@ CREATE TABLE {prefix}sft_files (
 
 -- Share links
 CREATE TABLE {prefix}sft_shares (
-    id               bigint(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
-    vault_id         bigint(20)   UNSIGNED NOT NULL,
-    token            varchar(100) NOT NULL UNIQUE,
-    recipient_email  varchar(255) NOT NULL,
-    created_by       bigint(20)   UNSIGNED NOT NULL,
-    status           varchar(20)  NOT NULL DEFAULT 'pending',
-    max_downloads    int(11)      NOT NULL DEFAULT 0,   -- 0 = unlimited
-    download_count   int(11)      NOT NULL DEFAULT 0,
-    expires_at       datetime     DEFAULT NULL,
-    last_accessed    datetime     DEFAULT NULL,
-    created_at       datetime     NOT NULL,
+    id                   bigint(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
+    vault_id             bigint(20)   UNSIGNED NOT NULL,
+    token                varchar(100) NOT NULL UNIQUE,
+    recipient_email      varchar(255) NOT NULL,
+    created_by           bigint(20)   UNSIGNED NOT NULL,
+    status               varchar(20)  NOT NULL DEFAULT 'pending',
+    max_downloads        int(11)      NOT NULL DEFAULT 0,       -- 0 = unlimited
+    download_count       int(11)      NOT NULL DEFAULT 0,
+    expires_at           datetime     DEFAULT NULL,
+    last_accessed        datetime     DEFAULT NULL,
+    created_at           datetime     NOT NULL,
+    expiry_warning_sent  tinyint(1)   NOT NULL DEFAULT 0,       -- 1 after warning email sent
     PRIMARY KEY (id),
     KEY vault_id (vault_id),
     KEY token    (token)
@@ -133,10 +135,13 @@ CREATE TABLE {prefix}sft_audit (
 ### Upload
 
 ```
-User selects file
-→ Browser splits into chunks (sized to fit PHP limits)
+User selects one or more files
+→ Browser queues files; uploads sequentially
+→ Each file split into chunks (sized to fit PHP limits)
 → Each chunk POST'd to wp-ajax.php?action=sft_upload_chunk
 → Server reassembles chunks into temp file
+→ sft_is_allowed_file_type(): check extension against allowlist (rejects + unlinks if not permitted)
+→ sft_get_user_storage_used(): check quota not exceeded (rejects + unlinks if over limit)
 → sft_encrypt_file_streaming():
     vault_key = HMAC-SHA256(master_key, vault_salt)
     iv        = random_bytes(16)
@@ -156,7 +161,22 @@ Request arrives at download handler (admin or frontend)
     vault_key = HMAC-SHA256(master_key, vault_salt)
     read .enc in 1MB blocks → openssl_decrypt → output to browser
 → Increment download_count on share
+→ sft_send_download_notification(): email vault owner if notifications enabled
 → Log SFT_EVT_FILE_DOWNLOADED in sft_audit
+```
+
+### ZIP Bulk Download
+
+```
+Recipient clicks "Download All as ZIP"
+→ wp-ajax.php?action=sft_zip_download
+→ Validate download session token and share accessibility
+→ For each file in vault:
+    sft_decrypt_file_to_path(): decrypt .enc → temp plaintext file
+→ ZipArchive::addFile() each temp file
+→ $zip->close() (data written into archive)
+→ Stream ZIP to browser
+→ Unlink all temp plaintext files
 ```
 
 ---
@@ -194,9 +214,10 @@ Runs hourly via `sft_lifecycle_tasks()`:
 
 1. **Expire vaults** — sets vaults past `expires_at` to `expired` status.
 2. **Expire shares** — sets shares past `expires_at` to `expired` status.
-3. **Clean OTPs** — deletes OTP records past `expires_at`.
-4. **Prune chunks** — deletes orphaned chunk part files older than 24 hours.
-5. **Auto-prune audit** — if enabled, deletes audit rows older than the retention window.
+3. **Send expiry warnings** — emails vault owners for shares within the configured lead-time window that have not yet been warned (`expiry_warning_sent = 0`). Sets `expiry_warning_sent = 1` after sending.
+4. **Clean OTPs** — deletes OTP records past `expires_at`.
+5. **Prune chunks** — deletes orphaned chunk part files older than 24 hours.
+6. **Auto-prune audit** — if enabled, deletes audit rows older than the retention window.
 
 ---
 
@@ -223,12 +244,22 @@ Runs hourly via `sft_lifecycle_tasks()`:
 | `sft_get_vault(int)` | class-sft-vault.php | Single vault row by ID |
 | `sft_get_user_vaults(int, array)` | class-sft-vault.php | All vaults for owner with optional filter/sort/page |
 | `sft_get_all_vaults(array)` | class-sft-vault.php | All vaults (admin) with filter/sort/page |
+| `sft_update_vault_meta(int, string, string, int)` | class-sft-vault.php | Update vault name and description, log `vault_updated` |
+| `sft_transfer_vault(int, int, int)` | class-sft-vault.php | Reassign vault owner, log `vault_transferred` |
+| `sft_is_allowed_file_type(string)` | class-sft-vault.php | True if extension is permitted by the allowlist |
+| `sft_get_user_storage_used(int)` | class-sft-vault.php | Total encrypted bytes across all vaults for a user |
 | `sft_encrypt_file_streaming(string, string)` | class-sft-crypto.php | Stream-encrypt a temp file to .enc |
 | `sft_decrypt_file_streaming(string, string, string)` | class-sft-crypto.php | Stream-decrypt .enc to output stream |
+| `sft_decrypt_file_to_path(string, string, string, int, string)` | class-sft-crypto.php | Decrypt .enc to a temp file path (used for ZIP) |
 | `sft_create_share(...)` | class-sft-share.php | Create share record, send invite email |
-| `sft_send_otp(int)` | class-sft-share.php | Generate, hash, store, and email OTP |
+| `sft_send_otp(int)` | class-sft-share.php | Generate, hash, store, and email OTP (with cooldown check) |
 | `sft_verify_otp_for_share(int, string)` | class-sft-share.php | Validate OTP, enforce attempt limit |
 | `sft_log(string, ...)` | class-sft-audit.php | Insert audit row, optionally write to SIEM file |
 | `sft_enforce_share_limits()` | class-sft-share.php | Retroactively apply global limits to existing shares |
+| `sft_get_email_template(string)` | class-sft-notifications.php | Return subject + body from options or built-in defaults |
+| `sft_render_email_template(string, array)` | class-sft-notifications.php | Replace `{token}` placeholders in a template string |
+| `sft_send_download_notification(int, int, string)` | class-sft-notifications.php | Email vault owner on recipient file download |
+| `sft_send_expiry_warning(object)` | class-sft-notifications.php | Email vault owner before share expiry; set warning flag |
+| `sft_maybe_upgrade_db()` | class-sft-db.php | Run `dbDelta()` if `sft_db_version` option is outdated |
 | `sft_sortable_th(...)` | class-sft-admin.php | Render server-side sortable `<th>` element |
 | `sftSortTable(tableId)` | Inline JS | Initialize client-side sort on a table |
