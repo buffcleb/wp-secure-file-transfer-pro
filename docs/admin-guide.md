@@ -71,7 +71,7 @@ The inspector shows:
 - **Vault Expiry** — edit or clear the vault's expiry date.
 - **Delete Vault** — permanently remove the vault, all files, and all shares. Cannot be undone.
 
-[[SCREENSHOT: Vault inspector showing the Edit Name & Description form open with the vault name and description fields filled in]]
+![Admin Dashboard - Vault inspector edit](/images/UserDashboard_VaultDetailEdit.jpg)
 
 All tables in the inspector are sortable client-side by clicking column headers.
 
@@ -111,7 +111,7 @@ Auto-prune via WP-Cron can be configured in **Settings → Audit Log Retention**
 
 Manage which non-administrator users have access to vault features.
 
-![User Dashboard - Vault Detail](/images/UserDashboard_VaultDetail.jpg)
+![Admin Dashboard - User Management](/images/AdminDashboard_Users.jpg)
 
 ### Access roles
 
