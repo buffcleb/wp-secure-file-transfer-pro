@@ -74,6 +74,8 @@ function sft_render_user_vault_detail( int $vault_id ): void {
 			<?php endif; ?>
 		</div>
 		<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;">
+			<!-- Edit name / description -->
+			<button type="button" class="button" onclick="sftUdToggle('sft-meta-form')">Edit Name &amp; Description</button>
 			<!-- Edit expiry -->
 			<button type="button" class="button" onclick="sftUdToggle('sft-expiry-form')">Edit Expiry</button>
 			<?php if ( $is_active ) : ?>
@@ -84,6 +86,29 @@ function sft_render_user_vault_detail( int $vault_id ): void {
 				<input type="submit" name="sft_ud_delete_vault" value="Delete Vault" class="button sft-danger">
 			</form>
 			<?php endif; ?>
+		</div>
+	</div>
+
+	<!-- Edit vault name / description inline form -->
+	<div id="sft-meta-form" style="display:none; margin-top:12px;">
+		<div class="sft-card" style="margin-top:0; padding:16px;">
+			<form method="post" action="<?php echo esc_url( $form_url ); ?>">
+				<?php wp_nonce_field( 'sft_user_dashboard_action', 'sft_user_nonce' ); ?>
+				<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
+				<div style="margin-bottom:12px;">
+					<label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;" for="sft-vault-new-name">Vault Name <span style="color:#d63638;">*</span></label>
+					<input type="text" id="sft-vault-new-name" name="vault_new_name"
+					       value="<?php echo esc_attr( $vault->name ); ?>"
+					       maxlength="255" style="width:100%; max-width:420px;" required>
+				</div>
+				<div style="margin-bottom:12px;">
+					<label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;" for="sft-vault-new-desc">Description <span style="font-weight:400; color:#888;">(optional)</span></label>
+					<textarea id="sft-vault-new-desc" name="vault_new_description"
+					          rows="3" style="width:100%; max-width:420px;"><?php echo esc_textarea( $vault->description ); ?></textarea>
+				</div>
+				<input type="submit" name="sft_ud_edit_vault_meta" value="Save" class="button button-primary">
+				<button type="button" class="button" style="margin-left:4px;" onclick="sftUdToggle('sft-meta-form')">Cancel</button>
+			</form>
 		</div>
 	</div>
 

@@ -227,6 +227,52 @@ function sft_update_vault_expiry( int $vault_id, string $expires_at, int $actor_
 }
 
 /**
+ * Updates a vault's name and/or description.
+ *
+ * @param int    $vault_id    Vault to update.
+ * @param string $name        New name (max 255 chars). Must not be empty.
+ * @param string $description New description (may be empty to clear it).
+ * @param int    $actor_id    WP user performing the edit (for audit log).
+ * @return true|WP_Error
+ */
+function sft_update_vault_meta( int $vault_id, string $name, string $description, int $actor_id ) {
+	global $wpdb;
+
+	$name = sanitize_text_field( $name );
+	if ( $name === '' ) {
+		return new WP_Error( 'empty_name', 'Vault name cannot be empty.' );
+	}
+	if ( mb_strlen( $name ) > 255 ) {
+		$name = mb_substr( $name, 0, 255 );
+	}
+
+	$description = sanitize_textarea_field( $description );
+
+	$result = $wpdb->update(
+		"{$wpdb->prefix}sft_vaults",
+		[
+			'name'        => $name,
+			'description' => $description,
+			'updated_at'  => current_time( 'mysql', true ),
+		],
+		[ 'id' => $vault_id ],
+		[ '%s', '%s', '%s' ],
+		[ '%d' ]
+	);
+
+	if ( $result === false ) {
+		return new WP_Error( 'db_error', 'Could not update vault.' );
+	}
+
+	sft_log( SFT_EVT_VAULT_UPDATED, $vault_id, null,
+		[ 'name' => $name, 'description' => $description ],
+		$actor_id
+	);
+
+	return true;
+}
+
+/**
  * Permanently deletes a vault, all its files (from disk + DB), and all shares.
  * Writes a single audit event before deletion.
  */

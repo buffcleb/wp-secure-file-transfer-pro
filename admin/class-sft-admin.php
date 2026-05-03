@@ -350,6 +350,24 @@ function sft_handle_admin_post(): void {
 		exit;
 	}
 
+	// ── Admin: edit vault name/description ──────────────────────────────────
+	if ( isset( $_POST['sft_admin_edit_vault_meta'] ) ) {
+		check_admin_referer( 'sft_admin_action', 'sft_nonce' );
+		$vault_id    = (int) ( $_POST['vault_id'] ?? 0 );
+		$name        = sanitize_text_field( $_POST['vault_new_name'] ?? '' );
+		$description = sanitize_textarea_field( $_POST['vault_new_description'] ?? '' );
+		if ( $vault_id ) {
+			$result = sft_update_vault_meta( $vault_id, $name, $description, get_current_user_id() );
+			if ( is_wp_error( $result ) ) {
+				sft_set_notice( $result->get_error_message(), 'error' );
+			} else {
+				sft_set_notice( 'Vault name and description updated.', 'success' );
+			}
+		}
+		wp_redirect( add_query_arg( [ 'page' => 'sft-pro', 'tab' => 'vaults', 'vault_id' => $vault_id ], admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	// ── Admin: edit share ────────────────────────────────────────────────────
 	if ( isset( $_POST['sft_admin_edit_share'] ) ) {
 		$share_id      = (int) ( $_POST['share_id'] ?? 0 );
@@ -441,10 +459,13 @@ function sft_register_admin_help_tabs(): void {
 					'<p>Inside the vault inspector you can:</p>' .
 					'<ul>' .
 					'<li><strong>Download any file</strong> — admin downloads are fully decrypted on the fly and logged in the audit trail.</li>' .
+					'<li><strong>Download All as ZIP</strong> — decrypts all vault files and bundles them into a single ZIP archive for download. Requires the PHP ZipArchive extension.</li>' .
 					'<li><strong>Delete a file</strong> — permanently removes the encrypted file from disk and the database.</li>' .
 					'<li><strong>Edit a share</strong> — update the download limit or expiry date on a pending or active share without revoking and recreating it.</li>' .
 					'<li><strong>Revoke a share</strong> — immediately blocks the recipient from accessing the vault, even if they have an active download session.</li>' .
 					'<li><strong>Edit vault expiry</strong> — change or clear the vault\'s expiry date inline.</li>' .
+					'<li><strong>Edit name &amp; description</strong> — rename the vault or update its description without affecting files or shares.</li>' .
+					'<li><strong>Transfer ownership</strong> — reassign the vault to any user who already has Vault User or SFT Admin access. The original owner loses access; the new owner immediately sees it in their vault list.</li>' .
 					'<li><strong>Change vault status</strong> — set a vault to active, expired, revoked, or archived. Non-active vaults cannot be shared or uploaded to.</li>' .
 					'<li><strong>Delete vault</strong> — permanently removes all files, shares, and the vault record. This cannot be undone.</li>' .
 					'</ul>' .
@@ -522,7 +543,8 @@ function sft_register_admin_help_tabs(): void {
 				'content' =>
 					'<p>These settings control the one-time code (OTP) sent to share recipients as the second factor of authentication before they can download files.</p>' .
 					'<p><strong>OTP Validity</strong> — how many minutes a verification code remains valid after it is emailed. Shorter values reduce the window of opportunity if an email is intercepted; longer values are more forgiving if email delivery is slow. Range: 5–60 minutes.</p>' .
-					'<p><strong>Max Verification Attempts</strong> — the number of incorrect codes a recipient can enter before the code is invalidated and they must request a new one. Lower values reduce brute-force risk. Range: 1–10.</p>',
+					'<p><strong>Max Verification Attempts</strong> — the number of incorrect codes a recipient can enter before the code is invalidated and they must request a new one. Lower values reduce brute-force risk. Range: 1–10.</p>' .
+					'<p><strong>OTP Cooldown</strong> — minimum number of seconds a recipient must wait before they can request a new verification code. This prevents automated code-request flooding. Set to 0 to disable the cooldown.</p>',
 			] );
 			$screen->add_help_tab( [
 				'id'      => 'sft-settings-dl-limits',
@@ -587,6 +609,47 @@ function sft_register_admin_help_tabs(): void {
 					'<pre><code>define( \'SFT_MASTER_KEY\', \'your-64-hex-char-key\' );</code></pre>' .
 					'<p>Use the <strong>Generate New Key</strong> button to produce a cryptographically secure key server-side. The key is shown once and never stored by the plugin — copy it immediately into <code>wp-config.php</code>.</p>' .
 					'<p><strong>Warning:</strong> Replacing an existing key will permanently break decryption of all files already uploaded. Only generate a new key on a fresh installation with no uploaded files.</p>',
+			] );
+			$screen->add_help_tab( [
+				'id'      => 'sft-settings-notifications',
+				'title'   => 'Notifications',
+				'content' =>
+					'<p>These settings control automated email alerts sent to vault owners.</p>' .
+					'<ul>' .
+					'<li><strong>Download Notifications</strong> — when enabled, the vault owner receives an email each time a recipient successfully downloads a file. The notification includes the file name, share link details, and the recipient\'s IP address.</li>' .
+					'<li><strong>Expiry Warning Emails</strong> — when enabled, vault owners receive an advance warning before a share link expires. Set the number of days in advance the warning is sent (e.g. 3 days before expiry). Each share receives at most one warning, regardless of how many cron cycles run before expiry.</li>' .
+					'</ul>' .
+					'<p>Both notification types use the customisable email templates in the <strong>Email Templates</strong> section below.</p>',
+			] );
+			$screen->add_help_tab( [
+				'id'      => 'sft-settings-filetypes',
+				'title'   => 'File Type Restrictions',
+				'content' =>
+					'<p><strong>Allowed File Extensions</strong> — a comma-separated list of extensions that vault users are permitted to upload (e.g. <code>pdf, docx, xlsx, png</code>). Leave blank to allow all file types.</p>' .
+					'<p>The check is performed after all chunks have been reassembled into the complete file, before encryption and storage. Files that fail the check are deleted from the temporary assembly area and an error is returned to the uploader.</p>' .
+					'<p>This setting applies to vault users only. WordPress administrators are not restricted by it.</p>',
+			] );
+			$screen->add_help_tab( [
+				'id'      => 'sft-settings-quotas',
+				'title'   => 'Storage Quotas',
+				'content' =>
+					'<p><strong>Per-User Storage Quota (MB)</strong> — the maximum total encrypted storage a single vault user may consume across all their vaults. Set to 0 for no limit.</p>' .
+					'<p>Quota is calculated as the sum of all encrypted file sizes stored across every vault owned by the user. The check runs at upload time; if adding the new file would push the user over quota, the upload is rejected and the assembled temp file is discarded.</p>' .
+					'<p>Administrators are not subject to quotas.</p>',
+			] );
+			$screen->add_help_tab( [
+				'id'      => 'sft-settings-templates',
+				'title'   => 'Email Templates',
+				'content' =>
+					'<p>Customise the subject line and body of every automated email sent by the plugin. Four templates are available:</p>' .
+					'<ul>' .
+					'<li><strong>Share Invitation</strong> — sent to the recipient when a vault owner creates a share link.</li>' .
+					'<li><strong>OTP Verification</strong> — sent to the recipient with their one-time verification code when they attempt to access a vault.</li>' .
+					'<li><strong>Download Notification</strong> — sent to the vault owner when a recipient downloads a file (requires Download Notifications to be enabled).</li>' .
+					'<li><strong>Share Expiry Warning</strong> — sent to the vault owner before a share link expires (requires Expiry Warning Emails to be enabled).</li>' .
+					'</ul>' .
+					'<p>Templates support placeholder tokens in <code>{curly_braces}</code>. Available tokens vary by template and are listed beneath each body field. Tokens that are not replaced (e.g. a misspelled placeholder) are left as-is in the sent email.</p>' .
+					'<p>Leave the subject or body blank to restore the built-in default for that field.</p>',
 			] );
 			$screen->add_help_tab( [
 				'id'      => 'sft-settings-data',

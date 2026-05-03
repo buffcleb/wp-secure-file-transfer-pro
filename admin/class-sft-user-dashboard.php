@@ -450,6 +450,20 @@ function sft_handle_user_dashboard_post(): void {
 		wp_redirect( $detail_url( $vault_id ) );
 		exit;
 	}
+
+	if ( isset( $_POST['sft_ud_edit_vault_meta'] ) ) {
+		$assert_vault_owner( $vault_id );
+		$name        = sanitize_text_field( $_POST['vault_new_name'] ?? '' );
+		$description = sanitize_textarea_field( $_POST['vault_new_description'] ?? '' );
+		$result      = sft_update_vault_meta( $vault_id, $name, $description, $user_id );
+		if ( is_wp_error( $result ) ) {
+			sft_ud_set_notice( $result->get_error_message(), 'error' );
+		} else {
+			sft_ud_set_notice( 'Vault updated.', 'success' );
+		}
+		wp_redirect( $detail_url( $vault_id ) );
+		exit;
+	}
 }
 
 // ─── Notice helpers ───────────────────────────────────────────────────────────

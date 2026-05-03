@@ -173,8 +173,37 @@ function sft_render_vault_inspector( int $vault_id ): void {
 					<br><?php echo esc_html( $vault->description ); ?>
 				<?php endif; ?>
 			</span>
+			<button type="button" class="button button-small" onclick="sftAdmToggle('sft-adm-meta-form')">Edit Name &amp; Description</button>
 			<button type="button" class="button button-small" onclick="sftAdmToggle('sft-adm-expiry-form')">Edit Expiry</button>
 		</p>
+
+		<!-- Edit vault name / description inline form -->
+		<div id="sft-adm-meta-form" style="display:none;margin-bottom:16px;">
+			<div class="sft-card" style="margin-top:0;padding:14px 20px;">
+				<form method="post" action="<?php echo esc_url( $form_url ); ?>">
+					<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
+					<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
+					<div style="margin-bottom:10px;">
+						<label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">
+							Vault Name <span style="color:#d63638;">*</span>
+						</label>
+						<input type="text" name="vault_new_name"
+						       value="<?php echo esc_attr( $vault->name ); ?>"
+						       maxlength="255" required
+						       style="width:100%;max-width:400px;padding:5px 8px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px;">
+					</div>
+					<div style="margin-bottom:10px;">
+						<label style="display:block;font-weight:600;font-size:13px;margin-bottom:4px;">
+							Description <span style="font-weight:400;color:#888;">(optional)</span>
+						</label>
+						<textarea name="vault_new_description" rows="3"
+						          style="width:100%;max-width:400px;padding:5px 8px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px;"><?php echo esc_textarea( $vault->description ); ?></textarea>
+					</div>
+					<input type="submit" name="sft_admin_edit_vault_meta" value="Save" class="button button-primary">
+					<button type="button" class="button" style="margin-left:4px;" onclick="sftAdmToggle('sft-adm-meta-form')">Cancel</button>
+				</form>
+			</div>
+		</div>
 
 		<!-- Edit vault expiry inline form -->
 		<div id="sft-adm-expiry-form" style="display:none;margin-bottom:16px;">
@@ -201,23 +230,25 @@ function sft_render_vault_inspector( int $vault_id ): void {
 
 		<!-- Status controls -->
 		<div class="sft-card" style="margin-top:0; padding:14px 20px;">
-			<form method="post" style="display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap;">
-				<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
-				<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
-				<label style="font-size:13px;font-weight:600;">Change Status:</label>
-				<select name="new_status" style="padding:4px 8px;font-size:13px;">
-					<?php foreach ( [ 'active', 'expired', 'revoked', 'archived' ] as $s ) : ?>
-						<option value="<?php echo esc_attr( $s ); ?>" <?php selected( $vault->status, $s ); ?>><?php echo ucfirst( $s ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<input type="submit" name="sft_admin_vault_status" value="Update Status" class="button">
-			</form>
-			<form method="post" style="display:inline-block; margin-left:16px;"
-			      onsubmit="return confirm('Permanently delete this vault and ALL its files? This cannot be undone.');">
-				<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
-				<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
-				<input type="submit" name="sft_admin_delete_vault" value="Delete Vault" class="button sft-danger">
-			</form>
+			<div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+				<form method="post" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:0;">
+					<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
+					<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
+					<label style="font-size:13px;font-weight:600;">Change Status:</label>
+					<select name="new_status" style="padding:4px 8px;font-size:13px;">
+						<?php foreach ( [ 'active', 'expired', 'revoked', 'archived' ] as $s ) : ?>
+							<option value="<?php echo esc_attr( $s ); ?>" <?php selected( $vault->status, $s ); ?>><?php echo ucfirst( $s ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<input type="submit" name="sft_admin_vault_status" value="Update Status" class="button">
+				</form>
+				<form method="post" style="display:flex; align-items:center; margin:0;"
+				      onsubmit="return confirm('Permanently delete this vault and ALL its files? This cannot be undone.');">
+					<?php wp_nonce_field( 'sft_admin_action', 'sft_nonce' ); ?>
+					<input type="hidden" name="vault_id" value="<?php echo $vault_id; ?>">
+					<input type="submit" name="sft_admin_delete_vault" value="Delete Vault" class="button sft-danger">
+				</form>
+			</div>
 		</div>
 
 		<!-- Transfer ownership -->
