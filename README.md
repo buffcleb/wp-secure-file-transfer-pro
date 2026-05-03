@@ -127,6 +127,7 @@ WordPress administrators are always exempt from share limits and expiration rest
 
 <p align="center">
 <img src="/images/Recipient_EmailConfirmation.jpg" width="300" alt="Recipient Email Confirmation"/>
+<br>
 <img src="/images/Recipient_DownloadPage.jpg" width="300" alt="Recipient Download Page"/>
 </p>
 
