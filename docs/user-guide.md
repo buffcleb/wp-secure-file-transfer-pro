@@ -155,7 +155,7 @@ Administrators can see the full unfiltered audit log across all vaults at **Secu
 
 If your administrator has enabled it, a **Secure File Transfer — My Vaults** widget appears on your WordPress dashboard (wp-admin home). It shows your vault and file counts, active share count, and your last 5 activity events at a glance.
 
-![WordPress Dashboard widget](/images/Recipient_DownloadPage.jpg)
+![WordPress Dashboard widget](/images/WordpressDashboard_AdminWidget.jpg)
 
 ---
 
